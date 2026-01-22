@@ -29,12 +29,12 @@ type AuthReq struct {
 }
 
 // creates a session cookie, adds it to the database and adds it to your cookies
-func (a *App) setSessionCookie(c *gin.Context, customerId string) error {
+func (a *App) setSessionCookie(c *gin.Context, customerId string) (string, error) {
 	// generate a random byte array
 	b := make([]byte, 32) // 256-bit
 	if _, err := rand.Read(b); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "error signing in"})
-		return err
+		return "", err
 	}
 
 	// encode that byte array to it is cookie safe
@@ -47,7 +47,7 @@ func (a *App) setSessionCookie(c *gin.Context, customerId string) error {
 		Customer:    customerId,
 		SessionHash: hash,
 	}); err != nil {
-		return err
+		return "", err
 	}
 
 	// sets the cookie with your session id
@@ -61,32 +61,46 @@ func (a *App) setSessionCookie(c *gin.Context, customerId string) error {
 		Expires:  time.Now().Add(7 * 24 * time.Hour),
 	})
 
-	return nil
+	return a.Store.GetRole(customerId), nil
+}
+
+func (a *App) GetRole(c *gin.Context) {
+	user, exists := c.Get("user")
+	fmt.Println(user)
+	if !exists {
+		c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "not logged in"})
+		return
+	}
+
+	role := a.Store.GetRole(fmt.Sprintf("%v", user))
+	fmt.Println(role)
+	c.IndentedJSON(http.StatusOK, gin.H{"role": role})
+
 }
 
 // checks if the use associated in context is of admin role
 func (a *App) CheckAdmin(c *gin.Context) {
 	user, exists := c.Get("user")
 	if !exists {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "not logged in"})
 		c.AbortWithStatus(http.StatusUnauthorized) //user doesn't exist
 		return
 	}
 
-	if admin := a.Store.CheckAdmin(fmt.Sprintf("%v", user)); !admin {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "not authorized"})
-		c.AbortWithStatus(http.StatusUnauthorized) //user is not authorized
+	if role := a.Store.GetRole(fmt.Sprintf("%v", user)); role != "admin" {
+		c.AbortWithStatus(http.StatusUnauthorized) //user doesn't exist
 		return
 	}
+
 	c.Next()
 }
 
 // checks if the user has a valid session id
 func (a *App) CheckAuth(c *gin.Context) {
 	token, err := c.Cookie("session")
+	fmt.Println(token)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
 		c.AbortWithStatus(http.StatusUnauthorized) //user is not authorized
+		return
 	}
 
 	// hash the session id in the cookies
@@ -94,11 +108,11 @@ func (a *App) CheckAuth(c *gin.Context) {
 
 	// if there exists a valid session entry, set the user id in context
 	if userid := a.Store.CheckAuth(hash); userid != "" {
+		fmt.Println(userid)
 		c.Set("user", userid)
 		c.Next()
 		return
 	}
-	c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "not authorized"})
 	c.AbortWithStatus(http.StatusUnauthorized) //user is not authorized
 }
 
@@ -147,12 +161,16 @@ func (a *App) SignUp(c *gin.Context) {
 	}
 
 	// logs in the user by creating a new session
-	if err := a.setSessionCookie(c, customerId); err != nil {
+	role, err := a.setSessionCookie(c, customerId)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "error creating session"})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "account successfully created"})
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "account successfully created",
+		"role":    role,
+	})
 }
 
 // signs in an existing user
@@ -178,13 +196,16 @@ func (a *App) SignIn(c *gin.Context) {
 	}
 
 	// set a new session cookie
-	if err := a.setSessionCookie(c, customerId); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "error signing in"})
-		fmt.Println(err)
+	role, err := a.setSessionCookie(c, customerId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "error creating session"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "successfully logged in"})
+	c.JSON(http.StatusOK, gin.H{
+		"message": "successfully logged in",
+		"role":    role,
+	})
 
 	//otherwise set cookies and add to session
 }

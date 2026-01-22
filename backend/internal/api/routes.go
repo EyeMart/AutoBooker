@@ -3,10 +3,17 @@ package api
 import (
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func (a *App) RegisterEndpoints(router *gin.Engine) {
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowHeaders:     []string{"Content-Type"},
+		AllowCredentials: true,
+	}))
 
 	router.POST("/appointments", a.CreateAppointment)
 	router.DELETE("/appointments/:id", a.DeleteAppointment)
@@ -20,6 +27,7 @@ func (a *App) RegisterEndpoints(router *gin.Engine) {
 
 	router.POST("/register", a.SignUp)
 	router.POST("/signin", a.SignIn)
+	router.GET("/role", a.CheckAuth, a.GetRole)
 
 	router.GET("/health", func(c *gin.Context) {
 		c.IndentedJSON(http.StatusOK, gin.H{"message": "ok"})

@@ -23,15 +23,15 @@ type AuthResp struct {
 	Password string `json:"password_hash"`
 }
 
-func (s *Store) CheckAdmin(user string) bool {
-	var email string
-	row := s.DB.QueryRow("SELECT email FROM users WHERE id=$1 AND role='admin'", user)
+func (s *Store) GetRole(user string) string {
+	var role string
+	row := s.DB.QueryRow("SELECT role FROM users WHERE id=$1 AND role='admin'", user)
 
-	if err := row.Scan(&email); err != nil {
-		return false
+	if err := row.Scan(&role); err != nil {
+		return role
 	}
 
-	return true
+	return role
 }
 
 // returns the user id if the log in is successful

@@ -5,11 +5,13 @@ import { z } from 'zod';
 import { toast } from 'react-toastify';
 import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 const signUpSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
+  first_name: z.string().min(2, 'First name must be at least 1 character'),
+  last_name: z.string().min(2, 'Last name must be at least 1 character'),
   email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  password: z.string().min(12, 'Password must be at least 12 characters'),
   confirmPassword: z.string()
 }).refine(data => data.password === data.confirmPassword, {
   message: 'Passwords do not match',
@@ -33,6 +35,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'signin' }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const signUpForm = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema)
@@ -46,7 +49,18 @@ const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'signin' }) => {
     setIsSubmitting(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
-      console.log('Sign up data:', data);
+      const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          first_name: data.first_name,
+          last_name:  data.last_name,
+          email: data.email,
+          password: data.password
+         })
+      };
+      const response = await fetch('http://127.0.0.1:8080/register', requestOptions);
+      await response.json();
       toast.success('Account created successfully!');
       signUpForm.reset();
       setMode('signin');
@@ -62,9 +76,44 @@ const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'signin' }) => {
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
       console.log('Sign in data:', data);
-      toast.success('Signed in successfully!');
-      signInForm.reset();
+      const requestOptions = {
+        method: 'POST',
+        credentials: 'include' as RequestCredentials,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password
+         })
+      };
+      const response = await fetch('http://127.0.0.1:8080/signin', requestOptions);
+      
+      if (response.ok){
+        const roleOptions = {
+          method: 'GET',
+          credentials: 'include' as RequestCredentials,
+          headers: { 'Content-Type': 'application/json' }
+        };
+        const roleResponse = await fetch('http://127.0.0.1:8080/role', roleOptions);
+        if (!response.ok){
+          throw new Error;  
+        }
+        const role = await roleResponse.json()
+
+        toast.success('Signed in successfully!');
+        signInForm.reset();
+        if (role.role === "admin"){
+          navigate("http://localhost:5173/appointments");
+        }else{
+          navigate("http://localhost:5173/");
+        }
+        
+      }
+      else{
+        toast.error('Failed to sign in. Please try again.');
+      }
+      
     } catch (error) {
+      console.log(error)
       toast.error('Failed to sign in. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -153,18 +202,34 @@ const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'signin' }) => {
           <form onSubmit={signUpForm.handleSubmit(onSignUp)} className="space-y-6">
             {/* Name */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">First Name</label>
               <div className="relative">
                 <User className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="John Doe"
-                  {...signUpForm.register('name')}
+                  placeholder="John"
+                  {...signUpForm.register('first_name')}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
-              {signUpForm.formState.errors.name && (
-                <p className="text-red-500 text-sm mt-1">{signUpForm.formState.errors.name.message}</p>
+              {signUpForm.formState.errors.first_name && (
+                <p className="text-red-500 text-sm mt-1">{signUpForm.formState.errors.first_name.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Last Name</label>
+              <div className="relative">
+                <User className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Doe"
+                  {...signUpForm.register('last_name')}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              {signUpForm.formState.errors.last_name && (
+                <p className="text-red-500 text-sm mt-1">{signUpForm.formState.errors.last_name.message}</p>
               )}
             </div>
 
