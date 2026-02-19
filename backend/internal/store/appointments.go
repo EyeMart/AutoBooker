@@ -6,6 +6,11 @@ import (
 	"strings"
 )
 
+type AppointmentArguments struct {
+	FromDate *string `json:"from_date"`
+	ToDate   *string `json:"to_date"`
+}
+
 type Appointment struct {
 	Notes     string `json:"notes"`
 	FirstName string `json:"first_name"`
@@ -35,11 +40,6 @@ func parseRows(rows *sql.Rows) ([]Appointment, error) {
 		appointments = append(appointments, app)
 	}
 	return appointments, nil
-}
-
-type AppointmentArguments struct {
-	FromDate *string `json:"from_date"`
-	ToDate   *string `json:"to_date"`
 }
 
 func buildAppointmentQuery(queried AppointmentArguments) (string, []any) {
