@@ -5,6 +5,12 @@ export default defineConfig({
   plugins: [react()],
   server: {
     allowedHosts: true,
+    proxy: {
+      "/signin": "http://127.0.0.1:8080",
+      "/role": "http://127.0.0.1:8080",
+      "/register": "http://127.0.0.1:8080",
+      "/admin/availability": "http://127.0.0.1:8080"
+    }
   },
   esbuild: {
     logOverride: {

@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import Home from './src/pages/Home';
 import Appointments from './src/pages/Appointments.tsx';
+import Availability from './src/pages/Availability.tsx'
 import Auth from './src/pages/Auth.tsx';
 import NotFound from './src/pages/NotFound';
 
@@ -18,6 +19,7 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/appointments" element={<Appointments />} />
+            <Route path="/availability" element={<Availability />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

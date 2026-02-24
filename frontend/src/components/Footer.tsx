@@ -41,9 +41,8 @@ const Footer: React.FC = () => {
                     to="https://www.instagram.com/andradesmobilemechanic/"
                     >
                     <Instagram className="w-4 h-4 mt-0.5" />
-                    
-                </Link>
-                @andradesmobilemechanic
+                  </Link>
+                    <a href="https://www.instagram.com/andradesmobilemechanic/" className="hover:text-white transition-colors">@andradesmobilemechanic</a>
               </li>
             </ul>
           </div>

@@ -45,12 +45,33 @@ const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'signin' }) => {
     resolver: zodResolver(signInSchema)
   });
 
+  const setRedirection = async() => {
+    const roleOptions = {
+      method: 'GET',
+      credentials: 'include' as RequestCredentials,
+      headers: { 'Content-Type': 'application/json' }
+    };
+    const roleResponse = await fetch('/role', roleOptions);
+    if (!roleResponse.ok){
+      throw new Error;  
+    }
+    const role = await roleResponse.json()
+
+    toast.success('Signed in successfully!');
+    signInForm.reset();
+    if (role.role === "admin"){
+      navigate("http://localhost:5173/appointments");
+    }else{
+      navigate("http://localhost:5173/");
+    }
+  }
+
   const onSignUp = async (data: SignUpFormData) => {
     setIsSubmitting(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
       const requestOptions = {
         method: 'POST',
+        credentials: 'include' as RequestCredentials,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           first_name: data.first_name,
@@ -59,11 +80,10 @@ const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'signin' }) => {
           password: data.password
          })
       };
-      const response = await fetch('http://127.0.0.1:8080/register', requestOptions);
-      await response.json();
-      toast.success('Account created successfully!');
-      signUpForm.reset();
-      setMode('signin');
+      const response = await fetch('/register', requestOptions);
+      if (response.ok){
+        await setRedirection()
+      }
     } catch (error) {
       toast.error('Failed to create account. Please try again.');
     } finally {
@@ -74,9 +94,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'signin' }) => {
   const onSignIn = async (data: SignInFormData) => {
     setIsSubmitting(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      console.log('Sign in data:', data);
-      const requestOptions = {
+     const requestOptions = {
         method: 'POST',
         credentials: 'include' as RequestCredentials,
         headers: { 'Content-Type': 'application/json' },
@@ -85,28 +103,10 @@ const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'signin' }) => {
           password: data.password
          })
       };
-      const response = await fetch('http://127.0.0.1:8080/signin', requestOptions);
+      const response = await fetch('/signin', requestOptions);
       
       if (response.ok){
-        const roleOptions = {
-          method: 'GET',
-          credentials: 'include' as RequestCredentials,
-          headers: { 'Content-Type': 'application/json' }
-        };
-        const roleResponse = await fetch('http://127.0.0.1:8080/role', roleOptions);
-        if (!response.ok){
-          throw new Error;  
-        }
-        const role = await roleResponse.json()
-
-        toast.success('Signed in successfully!');
-        signInForm.reset();
-        if (role.role === "admin"){
-          navigate("http://localhost:5173/appointments");
-        }else{
-          navigate("http://localhost:5173/");
-        }
-        
+        await setRedirection()
       }
       else{
         toast.error('Failed to sign in. Please try again.');

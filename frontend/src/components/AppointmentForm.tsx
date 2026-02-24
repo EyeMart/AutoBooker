@@ -49,7 +49,6 @@ const AppointmentForm: React.FC = () => {
     setIsSubmitting(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
       console.log('Appointment data:', data);
       toast.success('Appointment booked successfully! We\'ll confirm shortly.');
       reset();
