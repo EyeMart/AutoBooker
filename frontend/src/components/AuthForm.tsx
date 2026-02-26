@@ -51,7 +51,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'signin' }) => {
       credentials: 'include' as RequestCredentials,
       headers: { 'Content-Type': 'application/json' }
     };
-    const roleResponse = await fetch('/role', roleOptions);
+    const roleResponse = await fetch('/api/role', roleOptions);
     if (!roleResponse.ok){
       throw new Error;  
     }
@@ -60,9 +60,9 @@ const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'signin' }) => {
     toast.success('Signed in successfully!');
     signInForm.reset();
     if (role.role === "admin"){
-      navigate("http://localhost:5173/appointments");
+      navigate("/appointments");
     }else{
-      navigate("http://localhost:5173/");
+      navigate("/");
     }
   }
 
@@ -80,7 +80,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'signin' }) => {
           password: data.password
          })
       };
-      const response = await fetch('/register', requestOptions);
+      const response = await fetch('/api/register', requestOptions);
       if (response.ok){
         await setRedirection()
       }
@@ -103,7 +103,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ initialMode = 'signin' }) => {
           password: data.password
          })
       };
-      const response = await fetch('/signin', requestOptions);
+      const response = await fetch('/api/signin', requestOptions);
       
       if (response.ok){
         await setRedirection()

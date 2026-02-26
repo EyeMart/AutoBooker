@@ -12,10 +12,10 @@ const Header: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav className="max-w-7xl mx-6 px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 font-bold text-xl text-gray-900 hover:text-gray-700 transition-colors">
+          <Link to="/" className="gap-2 font-bold text-xl text-gray-900 hover:text-gray-700 transition-colors">
             <span>Andrade's Mobile Mechanic</span>
           </Link>
 
@@ -40,7 +40,7 @@ const Header: React.FC = () => {
           </div>
 
           {/* Auth Button & Mobile Menu Toggle */}
-          <div className="flex items-center gap-4">
+          {/* <div className="flex items-center gap-4">
             <Link
               to="/auth"
               className="hidden md:inline-block px-6 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
@@ -55,7 +55,7 @@ const Header: React.FC = () => {
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* Mobile Navigation */}
@@ -79,13 +79,13 @@ const Header: React.FC = () => {
             >
               Book Appointment
             </Link>
-            <Link
+            {/* <Link
               to="/auth"
               className="block mt-4 px-4 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors text-center"
               onClick={() => setIsMenuOpen(false)}
             >
               Sign In
-            </Link>
+            </Link> */}
           </div>
         )}
       </nav>

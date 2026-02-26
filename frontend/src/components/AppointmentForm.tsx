@@ -7,13 +7,18 @@ import { Calendar, Clock, User, Mail, Phone, MessageSquare, MapPin } from 'lucid
 import { motion } from 'framer-motion';
 
 const appointmentSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
+  first_name: z.string().min(1, 'Please include your first name'),
+  last_name: z.string().min(1, 'Please include your last name'),
   email: z.string().email('Invalid email address'),
   phone: z.string().regex(/^\d{10}$/, 'Phone must be 10 digits'),
   date: z.string().min(1, 'Please select a date'),
-  time: z.string().min(1, 'Please select a time'),
+  timeslot: z.string().min(1, 'Please select a time'),
   service: z.string().min(1, 'Please select a service'),
   location: z.string().min(5, 'Please provide your location'),
+  make: z.string().min(1, 'Please include your car\'s make'),
+  model: z.string().min(1, 'Please include your car\'s model'),
+  year: z.string().min(1, 'Please include your car\'s year'),
+  mileage: z.string().optional(),
   notes: z.string().optional()
 });
 
@@ -41,15 +46,44 @@ const AppointmentForm: React.FC = () => {
   ];
 
   const timeSlots = [
-    '08:00 AM', '09:00 AM', '10:00 AM', '11:00 AM',
-    '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM'
+    '08:00 AM - 09:30 AM',
+    '10:00 AM - 11:30 AM',
+    '12:00 PM - 01:30 PM',
+    '02:00 PM - 03:30 PM',
+    '04:00 PM - 05:30 PM'
   ];
+
 
   const onSubmit = async (data: AppointmentFormData) => {
     setIsSubmitting(true);
     try {
       // Simulate API call
-      console.log('Appointment data:', data);
+      const appointmentOptions = {
+          method: 'POST',
+          credentials: 'include' as RequestCredentials,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            notes: data.notes,
+            first_name: data.first_name,
+            last_name: data.last_name,
+            email: data.email,
+            phone: data.phone,
+            address: data.location,
+            make: data.make,
+            model: data.model,
+            year: data.year,
+            mileage: data.mileage,
+            date: data.date,
+            timeslot: data.timeslot,
+            service: data.service
+          })
+          
+        };
+      const roleResponse = await fetch('/appointments', appointmentOptions);
+      if (!roleResponse.ok){
+        throw new Error;  
+      }
+      const role = await roleResponse.json()
       toast.success('Appointment booked successfully! We\'ll confirm shortly.');
       reset();
     } catch (error) {
@@ -70,19 +104,34 @@ const AppointmentForm: React.FC = () => {
       <h2 className="text-3xl font-bold text-gray-900 mb-8">Book Your Appointment</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        {/* Name */}
+        {/* First Name */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">First Name</label>
           <div className="relative">
             <User className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="John Doe"
-              {...register('name')}
+              placeholder="John"
+              {...register('first_name')}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
+          {errors.first_name && <p className="text-red-500 text-sm mt-1">{errors.first_name.message}</p>}
+        </div>
+
+        {/* Last Name */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Last Name</label>
+          <div className="relative">
+            <User className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Doe"
+              {...register('last_name')}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          {errors.last_name && <p className="text-red-500 text-sm mt-1">{errors.last_name.message}</p>}
         </div>
 
         {/* Email */}
@@ -115,6 +164,91 @@ const AppointmentForm: React.FC = () => {
           {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>}
         </div>
 
+        {/* Date */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Preferred Date</label>
+          <div className="relative">
+            <Calendar className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+            <input
+              type="date"
+              {...register('date')}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date.message}</p>}
+        </div>
+
+        {/* Location */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Service Location</label>
+          <div className="relative">
+            <MapPin className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="123 Main St, City, State"
+              {...register('location')}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location.message}</p>}
+        </div>
+
+        {/* Make */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Make</label>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Car Make"
+              {...register('make')}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location.message}</p>}
+        </div>
+
+        {/* Model */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Model</label>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Car Model"
+              {...register('model')}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location.message}</p>}
+        </div>
+
+        {/* Year */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Year</label>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Car Year"
+              {...register('year')}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location.message}</p>}
+        </div>
+
+        {/* Mileage */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Mileage</label>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Car Mileage"
+              {...register('mileage')}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location.message}</p>}
+        </div>
+
         {/* Service */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">Service Type</label>
@@ -130,27 +264,12 @@ const AppointmentForm: React.FC = () => {
           {errors.service && <p className="text-red-500 text-sm mt-1">{errors.service.message}</p>}
         </div>
 
-        {/* Date */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Preferred Date</label>
-          <div className="relative">
-            <Calendar className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-            <input
-              type="date"
-              {...register('date')}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date.message}</p>}
-        </div>
-
         {/* Time */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">Preferred Time</label>
           <div className="relative">
-            <Clock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
             <select
-              {...register('time')}
+              {...register('timeslot')}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">Select a time</option>
@@ -159,23 +278,9 @@ const AppointmentForm: React.FC = () => {
               ))}
             </select>
           </div>
-          {errors.time && <p className="text-red-500 text-sm mt-1">{errors.time.message}</p>}
+          {errors.timeslot && <p className="text-red-500 text-sm mt-1">{errors.timeslot.message}</p>}
         </div>
 
-        {/* Location */}
-        <div className="md:col-span-2">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Service Location</label>
-          <div className="relative">
-            <MapPin className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="123 Main St, City, State"
-              {...register('location')}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location.message}</p>}
-        </div>
 
         {/* Notes */}
         <div className="md:col-span-2">

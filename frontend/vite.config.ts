@@ -6,10 +6,11 @@ export default defineConfig({
   server: {
     allowedHosts: true,
     proxy: {
-      "/signin": "http://127.0.0.1:8080",
-      "/role": "http://127.0.0.1:8080",
-      "/register": "http://127.0.0.1:8080",
-      "/admin/availability": "http://127.0.0.1:8080"
+      "/api/signin": "http://127.0.0.1:8080",
+      "/api/role": "http://127.0.0.1:8080",
+      "/api/register": "http://127.0.0.1:8080",
+      "/api/admin/availability": "http://127.0.0.1:8080",
+      "/api/appointments": "http://127.0.0.1:8080"
     }
   },
   esbuild: {

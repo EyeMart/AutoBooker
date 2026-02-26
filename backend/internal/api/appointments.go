@@ -1,7 +1,10 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/EyeMart07/scheduler/internal/store"
 	"github.com/gin-gonic/gin"
@@ -16,12 +19,11 @@ type AppointmentReqs struct {
 	Address   string `json:"address"`
 	Make      string `json:"make"`
 	Model     string `json:"model"`
-	Year      int    `json:"year"`
-	Vin       string `json:"vin"`
-	Mileage   int    `json:"mileage"`
+	Year      string `json:"year"`
+	Mileage   string `json:"mileage"`
 	Date      string `json:"date"`
-	Start     string `json:"start_time"`
-	End       string `json:"end_time"`
+	Timeslot  string `json:"timeslot"`
+	Service   string `json:"service"`
 }
 
 /*
@@ -74,6 +76,11 @@ func (a *App) ChangeAppointment(c *gin.Context) {
 		return
 	}
 
+	start := strings.Split(changes.Timeslot, " - ")[0][:5] + ":00"
+	end := strings.Split(changes.Timeslot, " - ")[1][:5] + ":00"
+	year, _ := strconv.Atoi(changes.Year)
+	miles, _ := strconv.Atoi(changes.Mileage)
+
 	email, phone, err := a.Store.ChangeAppointment(id, store.Appointment{
 		Notes:     changes.Notes,
 		FirstName: changes.FirstName,
@@ -83,12 +90,12 @@ func (a *App) ChangeAppointment(c *gin.Context) {
 		Address:   changes.Address,
 		Make:      changes.Make,
 		Model:     changes.Model,
-		Year:      changes.Year,
-		Vin:       changes.Vin,
-		Mileage:   changes.Mileage,
+		Year:      year,
+		Vin:       "0000",
+		Mileage:   miles,
 		Date:      changes.Date,
-		Start:     changes.Start,
-		End:       changes.End,
+		Start:     start,
+		End:       end,
 	})
 
 	if err != nil || (email == "" && phone == "") {
@@ -106,8 +113,14 @@ func (a *App) CreateAppointment(c *gin.Context) {
 	// gets the appointment data from the request
 	if err := c.BindJSON(&newApp); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "invalid appointment data"})
+		fmt.Println(err)
 		return
 	}
+
+	start := strings.Split(newApp.Timeslot, " - ")[0][:5] + ":00"
+	end := strings.Split(newApp.Timeslot, " - ")[1][:5] + ":00"
+	year, _ := strconv.Atoi(newApp.Year)
+	miles, _ := strconv.Atoi(newApp.Mileage)
 
 	id, err := a.Store.CreateAppointment(store.Appointment{
 		Notes:     newApp.Notes,
@@ -118,16 +131,18 @@ func (a *App) CreateAppointment(c *gin.Context) {
 		Address:   newApp.Address,
 		Make:      newApp.Make,
 		Model:     newApp.Model,
-		Year:      newApp.Year,
-		Vin:       newApp.Vin,
-		Mileage:   newApp.Mileage,
+		Year:      year,
+		Vin:       "0000",
+		Mileage:   miles,
 		Date:      newApp.Date,
-		Start:     newApp.Start,
-		End:       newApp.End,
+		Start:     start,
+		End:       end,
 	})
 
 	if id == "" || err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "error creating appointment"})
+		fmt.Println(err)
+
 		return
 	}
 	// return the created status

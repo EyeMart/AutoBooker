@@ -155,6 +155,8 @@ func (s *Store) CreateAppointment(app Appointment) (string, error) {
 		return "", err
 	}
 
+	fmt.Println(app)
+
 	// formats the query with the given data
 	_, err = tx.Exec("INSERT INTO appointments(notes, first_name, last_name, email, phone, address, make, model, year, vin, mileage, date, start_time, end_time) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)", app.Notes, app.FirstName, app.LastName, app.Email, app.Phone, app.Address, app.Make, app.Model, app.Year, app.Vin, app.Mileage, app.Date, app.Start, app.End)
 
@@ -170,7 +172,8 @@ func (s *Store) CreateAppointment(app Appointment) (string, error) {
 		return "", err
 	}
 
-	row := s.DB.QueryRow("SELECT id FROM appointments WHERE email=$1 AND date=$2 AND start_time=$3, end_time=$4", app.Email, app.Date, app.Start, app.End)
+	// gets the appointment id to send a confirmation and allow the user to update or cancel an appointment later
+	row := s.DB.QueryRow("SELECT id FROM appointments WHERE email=$1 AND date=$2 AND start_time=$3 AND end_time=$4", app.Email, app.Date, app.Start, app.End)
 
 	var appId string
 	if err := row.Scan(&appId); err != nil {

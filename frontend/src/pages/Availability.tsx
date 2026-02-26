@@ -1,9 +1,45 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import AvailabilityForm from '../components/AvailabilityForm.tsx';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 export default function Availability() {
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    
+    const checkAdmin = async () => { 
+      try {
+        const roleOptions = {
+          method: 'GET',
+          credentials: 'include' as RequestCredentials,
+          headers: { 'Content-Type': 'application/json' }
+        };
+        const roleResponse = await fetch('/api/role', roleOptions);
+        if (!roleResponse.ok){
+          throw new Error;  
+        }
+        const role = await roleResponse.json()
+    
+        if (role.role == "customer"){
+          navigate("/");
+        }
+      } catch (err) {
+        navigate("/signin");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAdmin();
+  }, [navigate]);
+
+  if (loading) return <p>Checking permissions...</p>;
+
+
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />

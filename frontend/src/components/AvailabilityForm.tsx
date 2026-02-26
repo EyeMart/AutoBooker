@@ -9,13 +9,11 @@ import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 
 const timeSlots = [
-    '08:00 AM', '08:30 AM', '09:00 AM', 
-    '09:30 AM', '10:00 AM', '10:30 AM',
-    '11:00 AM', '11:30 AM', '12:00 PM',
-    '12:30 PM', '01:00 PM', '01:30 PM',
-    '02:00 PM', '02:30 PM', '03:00 PM',
-    '03:30 PM', '04:00 PM', '04:30 PM',
-    '05:00 PM'
+    '08:00 AM - 09:30 AM',
+    '10:00 AM - 11:30 AM',
+    '12:00 PM - 01:30 PM',
+    '02:00 PM - 03:30 PM',
+    '04:00 PM - 05:30 PM'
   ];
 
 
@@ -26,7 +24,6 @@ const availabilitySchema = z.object({
 })
 .superRefine((data, ctx) => {
     // Only compare if both exist
-
 
     if (!data.start_time || !data.end_time || !data.dates) return;
 
@@ -116,7 +113,7 @@ const AppointmentForm: React.FC = () => {
             end_time: end
           })
         };
-        const response = await fetch('/admin/availability', requestOptions);
+        const response = await fetch('/api/admin/availability', requestOptions);
         if (!response.ok){
           throw new Error;
         }
@@ -147,7 +144,6 @@ const AppointmentForm: React.FC = () => {
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">Start Time</label>
           <div className="relative">
-            <Clock className="absolute left-3 top-4 w-5 h-5 text-gray-400" />
             <select
               {...register('start_time')}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -165,7 +161,6 @@ const AppointmentForm: React.FC = () => {
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">End Time</label>
           <div className="relative">
-            <Clock className="absolute left-3 top-4 w-5 h-5 text-gray-400" />
             <select
               {...register('end_time')}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -181,9 +176,6 @@ const AppointmentForm: React.FC = () => {
       </div>
 
       {/* Date*/}
-
-      
-      
       <div className='grid flex justify-center gap-6 mb-6'>
         <div className="relative">
           <label className="block text-sm font-semibold text-gray-700 mb-2">Dates</label>
