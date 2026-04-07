@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -25,6 +25,7 @@ const appointmentSchema = z.object({
 type AppointmentFormData = z.infer<typeof appointmentSchema>;
 
 const AppointmentForm: React.FC = () => {
+  const [carMakes, setOptions] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     register,
@@ -53,11 +54,31 @@ const AppointmentForm: React.FC = () => {
     '04:00 PM - 05:30 PM'
   ];
 
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        const response = await fetch('/vehicles/GetAllMakes?format=csv', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+        // Assuming data is an array of { id, name }
+        const formattedOptions = data.map(item => ({
+          value: item.id,
+          label: item.name,
+        }));
+        setOptions(formattedOptions);
+      } catch (error) {
+        console.error("Error fetching options:", error);
+      }
+    };
+
+    fetchOptions();
+  }, []);
 
   const onSubmit = async (data: AppointmentFormData) => {
     setIsSubmitting(true);
     try {
-      // Simulate API call
       const appointmentOptions = {
           method: 'POST',
           credentials: 'include' as RequestCredentials,
@@ -79,7 +100,7 @@ const AppointmentForm: React.FC = () => {
           })
           
         };
-      const roleResponse = await fetch('/appointments', appointmentOptions);
+      const roleResponse = await fetch('/api/appointments', appointmentOptions);
       if (!roleResponse.ok){
         throw new Error;  
       }
@@ -197,12 +218,17 @@ const AppointmentForm: React.FC = () => {
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">Make</label>
           <div className="relative">
-            <input
-              type="text"
-              placeholder="Car Make"
-              {...register('make')}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+            <select
+            {...register('make')}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+            <option value="">Car Make</option>
+            {
+            carMakes.map(make => (
+              <option key={make} value={make}>{make}</option>
+            ))
+            }
+          </select>
           </div>
           {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location.message}</p>}
         </div>
