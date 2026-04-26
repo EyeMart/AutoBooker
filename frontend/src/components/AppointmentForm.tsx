@@ -26,7 +26,7 @@ const appointmentSchema = z.object({
 type AppointmentFormData = z.infer<typeof appointmentSchema>;
 
 const AppointmentForm: React.FC = () => {
-  const [carMakes, setOptions] = useState([]);
+  const [carMakes, setMakes] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     register,
@@ -38,7 +38,10 @@ const AppointmentForm: React.FC = () => {
     resolver: zodResolver(appointmentSchema)
   });
 
+  const selectedYear = watch("year");
   const selectedMake = watch("make");
+  const selectedModel = watch("model");
+
 
   const excludeSet = new Set([
     "1955 CUSTOM BELAIR",
@@ -46,7 +49,6 @@ const AppointmentForm: React.FC = () => {
     "AAS",
     "ABI",
     "AC PROPULSION",
-    "ACURA",
     "ALEXANDER DENNIS LIMITED",
     "ALFA ROMEO",
     "ALKANE",
@@ -66,7 +68,6 @@ const AppointmentForm: React.FC = () => {
     "ASTON MARTIN",
     "ASUNA",
     "ATLANTA FABRICATING & EQUIPMENT CO",
-    "AUDI",
     "AUTOCAR",
     "AUTOCAR INDUSTRIES",
     "AUTOCAR LTD",
@@ -92,7 +93,6 @@ const AppointmentForm: React.FC = () => {
     "BLUE ARC",
     "BLUE BIRD",
     "BLUECAR",
-    "BMW",
     "BORAH",
     "BOULDER ELECTRIC VEHICLE",
     "BRAIN UNLIMITED",
@@ -101,12 +101,10 @@ const AppointmentForm: React.FC = () => {
     "BTL",
     "BUG MOTORS",
     "BUGATTI",
-    "BUICK",
     "BUSSCAR",
     "BXR",
     "BYD",
     "C-R CHEETAH RACE CARS",
-    "CADILLAC",
     "CALAVERAS MFG. INC.",
     "CALIFORNIA",
     "CALMOTORS",
@@ -123,8 +121,6 @@ const AppointmentForm: React.FC = () => {
     "CHANCE COACH",
     "CHANJE",
     "CHECKER",
-    "CHEVROLET",
-    "CHRYSLER",
     "CLASSIC ROADSTERS",
     "CLASSIC SPORTS CARS",
     "CLASSIC TROLLEY",
@@ -153,7 +149,6 @@ const AppointmentForm: React.FC = () => {
     "DAEWOO",
     "DAIHATSU",
     "DAIMLER",
-    "DATSUN",
     "DAYTONA COACH BUILDERS",
     "DELOREAN",
     "DENNIS",
@@ -166,7 +161,6 @@ const AppointmentForm: React.FC = () => {
     "DIAMOND HEAVY VEHICLE SOLUTIONS",
     "DIAMOND REO",
     "DINA AUTOBUSES",
-    "DODGE",
     "DONGFENG",
     "DUTCHER",
     "E-ONE",
@@ -208,7 +202,6 @@ const AppointmentForm: React.FC = () => {
     "FIAT",
     "FISKER",
     "FLXIBLE",
-    "FORD",
     "FORETRAVEL",
     "FORMULA 1 STREET COM",
     "FORTUNESPORT VES",
@@ -223,7 +216,6 @@ const AppointmentForm: React.FC = () => {
     "GLICKENHAUS",
     "GLOBAL ENVIRONMENTAL PRODUCTS INC",
     "GLOBAL FABRICATORS",
-    "GMC",
     "GRANDE WEST",
     "GREEN MACHINES",
     "GREENKRAFT",
@@ -239,13 +231,11 @@ const AppointmentForm: React.FC = () => {
     "HMC",
     "HOLDEN",
     "HOMETOWN MFG",
-    "HONDA",
     "HUMMER",
     "HUMMINGBIRDEV",
     "HUMVEE",
     "HUNTER AUTOMOTIVE GROUP, INC",
     "HUNTER DESIGN GROUP, LLC",
-    "HYUNDAI",
     "IC BUS",
     "IEV",
     "IEV CORPORATION / IEV",
@@ -298,7 +288,6 @@ const AppointmentForm: React.FC = () => {
     "LAND ROVER",
     "LAND ROVER SANTANA",
     "LEBER COACH MANUFACTURING",
-    "LEXUS",
     "LIMOS BY TIFFANY",
     "LIMOUSINE MANUFACTURING",
     "LINCOLN",
@@ -326,7 +315,6 @@ const AppointmentForm: React.FC = () => {
     "MAXIM INC.",
     "MAYBACH",
     "MAYHEM AUTOWORKZ",
-    "MAZDA",
     "MCLAREN",
     "MCNEILUS",
     "MERCEDES-BENZ",
@@ -340,7 +328,6 @@ const AppointmentForm: React.FC = () => {
     "MINI",
     "MINI BIG TRUCKS",
     "MINICARS",
-    "MITSUBISHI",
     "MITSUBISHI FUSO",
     "MK SPORTSCARS",
     "MOBILE ARMOURED VEHICLE",
@@ -362,7 +349,6 @@ const AppointmentForm: React.FC = () => {
     "NEW FLYER",
     "NEWELL",
     "NIKOLA",
-    "NISSAN",
     "NJD AUTOMOTIVE LLC",
     "NOVABUS",
     "NUENERGY",
@@ -460,11 +446,9 @@ const AppointmentForm: React.FC = () => {
     "STERLING MOTOR CAR",
     "STERLING TRUCK",
     "STOUTBILT",
-    "SUBARU",
     "SUPERCAR SYSTEM",
     "SUPERIOR COACHES",
     "SUTPHEN",
-    "SUZUKI",
     "T SERIES LLC",
     "TATSA",
     "TELO",
@@ -514,7 +498,6 @@ const AppointmentForm: React.FC = () => {
     "VISION INDUSTRIES",
     "VOLKSWAGEN",
     "VOLTZ",
-    "VOLVO",
     "VOLVO TRUCK",
     "VOSSLOH",
     "WARHAWK PERFORMANCE",
@@ -578,7 +561,36 @@ const AppointmentForm: React.FC = () => {
         formattedOptions.push(...data.Results
           .filter(item => (!excludeSet.has(String(item.MakeName).trim()) && !formattedOptions.includes(String(item.MakeName).trim())))
           .map(item => String(item.MakeName).trim()));
-        setOptions(formattedOptions.sort());
+        setMakes(formattedOptions.sort());
+      } catch (error) {
+        console.error("Error fetching options:", error);
+      }
+    };
+
+    fetchOptions();
+  }, []);
+  
+
+
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        let response = await fetch('https://vpic.nhtsa.dot.gov/api/vehicles/GetMakesForVehicleType/car?format=json');
+        let data = await response.json();
+        const formattedOptions = data.Results
+          .filter(item => !excludeSet.has(String(item.MakeName).trim()))
+          .map(item => String(item.MakeName).trim())
+        response = await fetch('https://vpic.nhtsa.dot.gov/api/vehicles/GetMakesForVehicleType/truck?format=json');
+        data = await response.json();
+        formattedOptions.push(...data.Results
+          .filter(item => (!excludeSet.has(String(item.MakeName).trim()) && !formattedOptions.includes(String(item.MakeName).trim())))
+          .map(item => String(item.MakeName).trim()));
+        response = await fetch('https://vpic.nhtsa.dot.gov/api/vehicles/GetMakesForVehicleType/mpv?format=json');
+        data = await response.json();
+        formattedOptions.push(...data.Results
+          .filter(item => (!excludeSet.has(String(item.MakeName).trim()) && !formattedOptions.includes(String(item.MakeName).trim())))
+          .map(item => String(item.MakeName).trim()));
+        setMakes(formattedOptions.sort());
       } catch (error) {
         console.error("Error fetching options:", error);
       }
@@ -733,27 +745,29 @@ const AppointmentForm: React.FC = () => {
           <label className="block text-sm font-semibold text-gray-700 mb-2">Make</label>
           <div className="relative">
             <select
-            {...register('make')}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              {...register('make')}
+              disabled={!selectedYear}
+              className="w-full h-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-            <option value="">Car Make</option>
-            {
-              carMakes.map(make => (
-              <option key={make} value={make}>{make}</option>
-            ))
-            }
-            <option value="Other">Other</option>
-          </select>
+              <option value="">Car Make</option>
+                {
+                  carMakes.map(make => (
+                  <option key={make} value={make}>{make}</option>
+                ))
+                }
+              <option value="Other">Other</option>
+            </select>
 
-          {selectedMake === "Other" && (
-            <input className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              type="text"
-              placeholder="Enter your car's make"
-              {...register("other_make")}
-            />
-          )}
+            {selectedMake === "Other" && (
+              <input className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                type="text"
+                placeholder="Enter your car's make"
+                {...register("other_make")}
+              />
+            )}
 
           </div>
+
           {errors.make && <p className="text-red-500 text-sm mt-1">{errors.make.message}</p>}
           {errors.other_make && <p className="text-red-500 text-sm mt-1">{errors.other_make.message}</p>}
         </div>
@@ -766,7 +780,7 @@ const AppointmentForm: React.FC = () => {
               type="text"
               placeholder="Car Model"
               {...register('model')}
-              className="w-full pl-3 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-3 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
           {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location.message}</p>}
@@ -776,12 +790,18 @@ const AppointmentForm: React.FC = () => {
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">Year</label>
           <div className="relative">
-            <input
-              type="text"
-              placeholder="Car Year"
+            <select
               {...register('year')}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+              className="w-full h-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">Car Year</option>
+                {
+                  [...Array(new Date().getFullYear() - 1984).keys()].reverse().map(year => (
+                    <option key = {year + 1985} value={year  + 1985}>{year + 1985}</option>
+                  ))
+                }
+              <option value="Other">Other</option>
+            </select>
           </div>
           {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location.message}</p>}
         </div>
