@@ -10,6 +10,10 @@
   :root {
     --background: 0 0% 100%;
     --foreground: 265 4% 12.9%;
+    --motion-black: #020102;
+    --motion-red: #c60012;
+    --motion-yellow: #ff751f;
+    --motion-blue: #1800ad;
     --card: 0 0% 100%;
     --card-foreground: 265 4% 12.9%;
     --popover: 0 0% 100%;

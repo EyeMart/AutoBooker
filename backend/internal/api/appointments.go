@@ -20,7 +20,7 @@ type AppointmentReqs struct {
 	Make      string `json:"make"`
 	Model     string `json:"model"`
 	Year      string `json:"year"`
-	Mileage   string `json:"mileage"`
+	Mileage   int    `json:"mileage"`
 	Date      string `json:"date"`
 	Timeslot  string `json:"timeslot"`
 	Service   string `json:"service"`
@@ -79,7 +79,6 @@ func (a *App) ChangeAppointment(c *gin.Context) {
 	start := strings.Split(changes.Timeslot, " - ")[0][:5] + ":00"
 	end := strings.Split(changes.Timeslot, " - ")[1][:5] + ":00"
 	year, _ := strconv.Atoi(changes.Year)
-	miles, _ := strconv.Atoi(changes.Mileage)
 
 	email, phone, err := a.Store.ChangeAppointment(id, store.Appointment{
 		Notes:     changes.Notes,
@@ -91,8 +90,7 @@ func (a *App) ChangeAppointment(c *gin.Context) {
 		Make:      changes.Make,
 		Model:     changes.Model,
 		Year:      year,
-		Vin:       "0000",
-		Mileage:   miles,
+		Mileage:   changes.Mileage,
 		Date:      changes.Date,
 		Start:     start,
 		End:       end,
@@ -120,7 +118,6 @@ func (a *App) CreateAppointment(c *gin.Context) {
 	start := strings.Split(newApp.Timeslot, " - ")[0][:5] + ":00"
 	end := strings.Split(newApp.Timeslot, " - ")[1][:5] + ":00"
 	year, _ := strconv.Atoi(newApp.Year)
-	miles, _ := strconv.Atoi(newApp.Mileage)
 
 	id, err := a.Store.CreateAppointment(store.Appointment{
 		Notes:     newApp.Notes,
@@ -132,8 +129,7 @@ func (a *App) CreateAppointment(c *gin.Context) {
 		Make:      newApp.Make,
 		Model:     newApp.Model,
 		Year:      year,
-		Vin:       "0000",
-		Mileage:   miles,
+		Mileage:   newApp.Mileage,
 		Date:      newApp.Date,
 		Start:     start,
 		End:       end,
