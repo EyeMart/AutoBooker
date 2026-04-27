@@ -17,7 +17,6 @@ type Appointment struct {
 	LastName  string `json:"last_name"`
 	Email     string `json:"email"`
 	Phone     string `json:"phone"`
-	Address   string `json:"address"`
 	Make      string `json:"make"`
 	Model     string `json:"model"`
 	Year      int    `json:"year"`
@@ -33,7 +32,7 @@ func parseRows(rows *sql.Rows) ([]Appointment, error) {
 	appointments := []Appointment{}
 	for rows.Next() {
 		var app Appointment
-		if err := rows.Scan(&app.Notes, &app.FirstName, &app.LastName, &app.Email, &app.Phone, &app.Address, &app.Make, &app.Model, &app.Year, &app.Mileage, &app.Date, &app.Start, &app.End); err != nil {
+		if err := rows.Scan(&app.Notes, &app.FirstName, &app.LastName, &app.Email, &app.Phone, &app.Make, &app.Model, &app.Year, &app.Mileage, &app.Date, &app.Start, &app.End); err != nil {
 			return appointments, err
 		}
 		appointments = append(appointments, app)
@@ -42,7 +41,7 @@ func parseRows(rows *sql.Rows) ([]Appointment, error) {
 }
 
 func buildAppointmentQuery(queried AppointmentArguments) (string, []any) {
-	q := `SELECT notes, first_name, last_name, email, phone, address, make, model, year, mileage, date, start_time, end_time FROM appointments`
+	q := `SELECT notes, first_name, last_name, email, phone, make, model, year, mileage, date, start_time, end_time FROM appointments`
 
 	where := []string{}
 	args := []any{}
@@ -98,7 +97,7 @@ func (s *Store) ChangeAppointment(id string, changes Appointment) (string, strin
 	}
 
 	// formats the query with the given data
-	_, err = tx.Exec("UPDATE appointments SET notes=$1, first_name=$2, last_name=$3, email=$4, phone=$5, address=$6, make=$7, model=$8, year=$9 mileage=$10, date=$11, start_time=$12, end_time=$13 WHERE id=$14", id, changes.Notes, changes.FirstName, changes.LastName, changes.Email, changes.Phone, changes.Address, changes.Make, changes.Model, changes.Year, changes.Mileage, changes.Date, changes.Start, changes.End, id)
+	_, err = tx.Exec("UPDATE appointments SET notes=$1, first_name=$2, last_name=$3, email=$4, phone=$5, make=$6, model=$7, year=$8 mileage=$9, date=$10, start_time=$11, end_time=$12 WHERE id=$13", id, changes.Notes, changes.FirstName, changes.LastName, changes.Email, changes.Phone, changes.Make, changes.Model, changes.Year, changes.Mileage, changes.Date, changes.Start, changes.End, id)
 
 	if err != nil {
 		tx.Rollback()
@@ -157,7 +156,7 @@ func (s *Store) CreateAppointment(app Appointment) (string, error) {
 	fmt.Println(app)
 
 	// formats the query with the given data
-	_, err = tx.Exec("INSERT INTO appointments(notes, first_name, last_name, email, phone, address, make, model, year, mileage, date, start_time, end_time) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)", app.Notes, app.FirstName, app.LastName, app.Email, app.Phone, app.Address, app.Make, app.Model, app.Year, app.Mileage, app.Date, app.Start, app.End)
+	_, err = tx.Exec("INSERT INTO appointments(notes, first_name, last_name, email, phone, make, model, year, mileage, date, start_time, end_time) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)", app.Notes, app.FirstName, app.LastName, app.Email, app.Phone, app.Make, app.Model, app.Year, app.Mileage, app.Date, app.Start, app.End)
 
 	if err != nil {
 		tx.Rollback()

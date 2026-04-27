@@ -16,7 +16,6 @@ type AppointmentReqs struct {
 	LastName  string `json:"last_name"`
 	Email     string `json:"email"`
 	Phone     string `json:"phone"`
-	Address   string `json:"address"`
 	Make      string `json:"make"`
 	Model     string `json:"model"`
 	Year      string `json:"year"`
@@ -86,7 +85,6 @@ func (a *App) ChangeAppointment(c *gin.Context) {
 		LastName:  changes.LastName,
 		Email:     changes.Email,
 		Phone:     changes.Phone,
-		Address:   changes.Address,
 		Make:      changes.Make,
 		Model:     changes.Model,
 		Year:      year,
@@ -125,7 +123,6 @@ func (a *App) CreateAppointment(c *gin.Context) {
 		LastName:  newApp.LastName,
 		Email:     newApp.Email,
 		Phone:     newApp.Phone,
-		Address:   newApp.Address,
 		Make:      newApp.Make,
 		Model:     newApp.Model,
 		Year:      year,
@@ -142,5 +139,6 @@ func (a *App) CreateAppointment(c *gin.Context) {
 		return
 	}
 	// return the created status
+	SendConfirmation(newApp.Email, newApp.FirstName)
 	c.IndentedJSON(http.StatusCreated, newApp)
 }
