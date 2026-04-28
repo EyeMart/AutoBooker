@@ -12,7 +12,7 @@ const signUpSchema = z
     first_name: z.string().min(2, "First name must be at least 1 character"),
     last_name: z.string().min(2, "Last name must be at least 1 character"),
     email: z.string().email("Invalid email address"),
-    password: z.string().min(12, "Password must be at least 12 characters"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {

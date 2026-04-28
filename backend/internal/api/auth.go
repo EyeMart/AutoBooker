@@ -66,14 +66,12 @@ func (a *App) setSessionCookie(c *gin.Context, customerId string) (string, error
 
 func (a *App) GetRole(c *gin.Context) {
 	user, exists := c.Get("user")
-	fmt.Println(user)
 	if !exists {
 		c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "not logged in"})
 		return
 	}
 
 	role := a.Store.GetRole(fmt.Sprintf("%v", user))
-	fmt.Println(role)
 	c.IndentedJSON(http.StatusOK, gin.H{"role": role})
 
 }
@@ -97,7 +95,6 @@ func (a *App) CheckAdmin(c *gin.Context) {
 // checks if the user has a valid session id
 func (a *App) CheckAuth(c *gin.Context) {
 	token, err := c.Cookie("session")
-	fmt.Println(token)
 	if err != nil {
 		c.AbortWithStatus(http.StatusUnauthorized) //user is not authorized
 		return
@@ -108,7 +105,6 @@ func (a *App) CheckAuth(c *gin.Context) {
 
 	// if there exists a valid session entry, set the user id in context
 	if userid := a.Store.CheckAuth(hash); userid != "" {
-		fmt.Println(userid)
 		c.Set("user", userid)
 		c.Next()
 		return
@@ -133,8 +129,8 @@ func (a *App) SignUp(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "invalid email"})
 		return
 	}
-	if len(password) < 12 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "password must be at least 12 characters"})
+	if len(password) < 8 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "password must be at least 8 characters"})
 		return
 	}
 
@@ -179,7 +175,6 @@ func (a *App) SignIn(c *gin.Context) {
 
 	if err := c.BindJSON(&credentials); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "error signing in"})
-		fmt.Println(err)
 		return
 	}
 

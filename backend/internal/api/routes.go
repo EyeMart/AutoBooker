@@ -9,8 +9,8 @@ import (
 
 func (a *App) RegisterEndpoints(router *gin.Engine) {
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173", "http://localhost:5173/book-appointment"},
-		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowOrigins:     []string{"http://localhost:5173", "http://localhost:5173/book-appointment", "http://localhost:5173/admin"},
+		AllowMethods:     []string{"GET", "POST", "OPTIONS", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Content-Type"},
 		AllowCredentials: true,
 	}))
@@ -19,11 +19,6 @@ func (a *App) RegisterEndpoints(router *gin.Engine) {
 	router.DELETE("/api/appointments/:id", a.DeleteAppointment)
 	router.PUT("/api/appointments/:id", a.ChangeAppointment)
 	router.GET("/api/admin/appointments", a.CheckAuth, a.CheckAdmin, a.GetAppointments)
-
-	router.PUT("/api/admin/availability/:date", a.CheckAuth, a.CheckAdmin, a.ChangeAvailability)
-	router.POST("/api/admin/availability", a.CheckAuth, a.CheckAdmin, a.AddAvailability)
-	router.GET("/api/availability", a.CheckAuth, a.GetAvailability)
-	router.GET("/api/timeslots", a.CheckAuth, a.GetTimeSlots)
 
 	router.POST("/api/register", a.SignUp)
 	router.POST("/api/signin", a.SignIn)

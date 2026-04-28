@@ -8,7 +8,7 @@ export default function Appointments() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-grow bg-[var(--motion-black)] text-gray-300 py-12 md:py-20">
+      <main className="flex-grow bg-gradient-to-b from-[var(--motion-black)] to-gray-900 text-gray-300 py-12 md:py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./src/pages/Home";
 import Appointments from "./src/pages/Appointments.tsx";
 import Auth from "./src/pages/Auth.tsx";
+import Admin from "./src/pages/Admin.tsx";
 import NotFound from "./src/pages/NotFound";
 
 const App: React.FC = () => {
@@ -17,6 +18,7 @@ const App: React.FC = () => {
             <Route path="/" element={<Home />} />
             <Route path="/book-appointment" element={<Appointments />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <ToastContainer

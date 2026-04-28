@@ -9,8 +9,8 @@ export default defineConfig({
       "/api/signin": "http://127.0.0.1:8080",
       "/api/role": "http://127.0.0.1:8080",
       "/api/register": "http://127.0.0.1:8080",
-      "/api/admin/availability": "http://127.0.0.1:8080",
-      "/api/appointments": "http://127.0.0.1:8080"
+      "/api/appointments": "http://127.0.0.1:8080",
+      "/api/admin/appointments": "http://127.0.0.1:8080"
     }
   },
   esbuild: {

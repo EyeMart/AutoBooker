@@ -6,7 +6,7 @@ import ImageCarousel from "../components/Carousel";
 
 const HeroSection: React.FC = () => {
   return (
-    <section className="relative overflow-hidden bg-[var(--motion-black)] text-gray-300 py-20 md:py-32">
+    <section className="relative overflow-hidden bg-gradient-to-b from-[var(--motion-black)] to-gray-900 text-gray-300 py-20 md:py-32">
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Left Content */}
         <motion.div
