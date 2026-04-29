@@ -18,7 +18,9 @@ func (a *App) RegisterEndpoints(router *gin.Engine) {
 	router.POST("/api/appointments", a.CreateAppointment)
 	router.DELETE("/api/appointments/:id", a.DeleteAppointment)
 	router.PUT("/api/appointments/:id", a.ChangeAppointment)
+	router.GET("/api/appointments/:id", a.GetSpecificAppointment)
 	router.GET("/api/admin/appointments", a.CheckAuth, a.CheckAdmin, a.GetAppointments)
+	router.GET("/api/unavailableslots", a.GetTimeSlots)
 
 	router.POST("/api/register", a.SignUp)
 	router.POST("/api/signin", a.SignIn)

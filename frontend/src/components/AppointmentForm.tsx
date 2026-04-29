@@ -6,6 +6,8 @@ import { toast } from "react-toastify";
 import { User, Mail, Phone, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import { services, excludeSet, timeSlots } from "./constants";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/style.css";
 
 const optionalString = (schema: z.ZodString) =>
   z.preprocess((val) => (val === "" ? undefined : val), schema.optional());
@@ -58,101 +60,176 @@ type AppointmentFormData = z.output<typeof appointmentSchema>;
 
 type AppointmentFormInput = z.input<typeof appointmentSchema>;
 
-const AppointmentForm: React.FC = () => {
+type AppointmentFormProps = {
+  defaultValues?: Partial<AppointmentFormInput>;
+  onSubmitOverride?: (data: AppointmentFormData) => Promise<void>;
+};
+
+const AppointmentForm: React.FC<AppointmentFormProps> = ({
+  defaultValues,
+  onSubmitOverride,
+}) => {
   const [carModels, setModels] = useState<string[]>([]);
   const [carMakes, setMakes] = useState<string[]>([]);
+  const [availableTimes, setTimes] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingModels, setLoadingModels] = useState(false);
+  const [loadingTimes, setLoadingTimes] = useState(false);
+  const controller = new AbortController();
+
   const {
     register,
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<AppointmentFormInput, any, AppointmentFormData>({
     resolver: zodResolver(appointmentSchema),
   });
 
+  useEffect(() => {
+    if (defaultValues) {
+      reset({
+        ...defaultValues,
+        year: defaultValues.year ? defaultValues.year.toString() : "2002",
+        date: defaultValues.date ? defaultValues.date.split("T")[0] : undefined,
+        make: defaultValues.make ?? "",
+        model: defaultValues.model ?? "",
+        timeslot: defaultValues.timeslot,
+      });
+    }
+  }, [defaultValues, reset]);
+
   const selectedYear = watch("year");
   const selectedMake = watch("make");
   const selectedModel = watch("model");
   const selectedVin = watch("vin");
+  const selectedDate = watch("date");
+  const selectedTimeslot = watch("timeslot");
+
+  const makeOptions: string[] = Array.from(
+    new Set([...(selectedMake ? [selectedMake] : []), ...carMakes]),
+  ).filter((x): x is string => typeof x === "string");
+
+  const modelOptions: string[] = Array.from(
+    new Set([...(selectedModel ? [selectedModel] : []), ...carModels]),
+  ).filter((x): x is string => typeof x === "string");
+
+  const timeslotOptions: string[] = Array.from(
+    new Set([
+      ...(selectedTimeslot ? [selectedTimeslot] : []),
+      ...availableTimes,
+    ]),
+  ).filter((x): x is string => typeof x === "string");
+
+  const fetchModels = async () => {
+    if (!selectedMake || !selectedYear) {
+      setModels([]);
+      return;
+    }
+
+    setLoadingModels(true);
+
+    try {
+      const vehicleTypes = ["car", "truck", "mpv"];
+
+      const requests = vehicleTypes.map((type) => {
+        const url = `https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/${selectedMake}/modelyear/${selectedYear}/vehicletype/${type}?format=json`;
+
+        return fetch(url, { signal: controller.signal }).then((res) =>
+          res.json(),
+        );
+      });
+
+      const results = await Promise.all(requests);
+
+      const allModels = results.flatMap((data) =>
+        data.Results.map((item: any) => String(item.Model_Name).trim()),
+      );
+
+      setModels([...new Set(allModels)].sort());
+    } catch (error: any) {
+      if (error.name !== "AbortError") {
+        console.error("Error fetching models:", error);
+      }
+    } finally {
+      setLoadingModels(false);
+    }
+  };
+
+  const fetchMakes = async () => {
+    try {
+      const vehicleTypes = ["car", "truck", "mpv"];
+
+      const requests = vehicleTypes.map((type) =>
+        fetch(
+          `https://vpic.nhtsa.dot.gov/api/vehicles/GetMakesForVehicleType/${type}?format=json`,
+        ).then((res) => res.json()),
+      );
+
+      const results = await Promise.all(requests);
+
+      const formattedOptions = results.flatMap((data) =>
+        data.Results.map((item: any) => String(item.MakeName).trim()).filter(
+          (make: string) => !excludeSet.has(make),
+        ),
+      );
+
+      setMakes([...new Set(formattedOptions)].sort());
+    } catch (error) {
+      console.error("Error fetching options:", error);
+    }
+  };
 
   // getting all makes
   useEffect(() => {
-    const fetchOptions = async () => {
-      try {
-        const vehicleTypes = ["car", "truck", "mpv"];
-
-        const requests = vehicleTypes.map((type) =>
-          fetch(
-            `https://vpic.nhtsa.dot.gov/api/vehicles/GetMakesForVehicleType/${type}?format=json`,
-          ).then((res) => res.json()),
-        );
-
-        const results = await Promise.all(requests);
-
-        const formattedOptions = results.flatMap((data) =>
-          data.Results.map((item: any) => String(item.MakeName).trim()).filter(
-            (make: string) => !excludeSet.has(make),
-          ),
-        );
-
-        setMakes([...new Set(formattedOptions)].sort());
-      } catch (error) {
-        console.error("Error fetching options:", error);
-      }
-    };
-
-    fetchOptions();
+    fetchMakes();
   }, []);
 
   // gettings models from selected make and year
   useEffect(() => {
-    const controller = new AbortController();
-
-    const fetchOptions = async () => {
-      if (!selectedMake || !selectedYear) {
-        setModels([]);
-        return;
-      }
-
-      setLoadingModels(true);
-      setModels([]);
-
-      try {
-        const vehicleTypes = ["car", "truck", "mpv"];
-
-        const requests = vehicleTypes.map((type) => {
-          const url = `https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/${selectedMake}/modelyear/${selectedYear}/vehicletype/${type}?format=json`;
-
-          return fetch(url, { signal: controller.signal }).then((res) =>
-            res.json(),
-          );
-        });
-
-        const results = await Promise.all(requests);
-
-        const allModels = results.flatMap((data) =>
-          data.Results.map((item: any) => String(item.Model_Name).trim()),
-        );
-
-        setModels([...new Set(allModels)].sort());
-      } catch (error: any) {
-        if (error.name !== "AbortError") {
-          console.error("Error fetching models:", error);
-        }
-      } finally {
-        setLoadingModels(false);
-      }
-    };
-
-    fetchOptions();
+    fetchModels();
 
     return () => controller.abort();
   }, [selectedMake, selectedYear]);
 
+  // get valid timeslots
+  useEffect(() => {
+    const fetchTimes = async () => {
+      if (!selectedDate) {
+        setTimes([]);
+        return;
+      }
+
+      setLoadingTimes(true);
+
+      try {
+        const res = await fetch(`/api/unavailableslots?on=${selectedDate}`, {
+          credentials: "include",
+        });
+
+        if (!res.ok) throw new Error("Failed to fetch times");
+
+        const times = await res.json();
+
+        const availableTimes = [...timeSlots, ...times].filter(
+          (x, _, all) => all.indexOf(x) === all.lastIndexOf(x),
+        );
+        setTimes(availableTimes);
+      } catch (error: any) {
+        console.error("Error fetching times:", error);
+      } finally {
+        setLoadingTimes(false);
+      }
+    };
+    fetchTimes();
+  }, [selectedDate]);
+
   const onSubmit = async (data: AppointmentFormData) => {
+    if (onSubmitOverride) {
+      return onSubmitOverride(data);
+    }
     setIsSubmitting(true);
 
     if (selectedVin) {
@@ -177,7 +254,7 @@ const AppointmentForm: React.FC = () => {
         credentials: "include" as RequestCredentials,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          comments: data.comments,
+          customer_comments: data.comments,
           first_name: data.first_name,
           last_name: data.last_name,
           email: data.email,
@@ -298,13 +375,28 @@ const AppointmentForm: React.FC = () => {
           <label className="block text-sm font-semibold text-gray-800 mb-2">
             Preferred Date
           </label>
-          <div className="relative">
-            <input
-              type="date"
-              {...register("date")}
-              className="w-full px-4 py-3 border text-gray-800 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
+
+          <DayPicker
+            mode="single"
+            selected={
+              selectedDate ? new Date(selectedDate + "T00:00:00") : undefined
+            }
+            onSelect={(date) => {
+              if (!date) return;
+              const value = date.toLocaleDateString("en-CA");
+              setValue("date", value, { shouldValidate: true });
+            }}
+            disabled={[{ before: new Date() }, { dayOfWeek: [0, 6] }]}
+            className="bg-white text-gray-800 rounded-lg border border-gray-300 p-3 text-sm"
+            classNames={{
+              months: "flex justify-center",
+              day: "rounded-md hover:bg-blue-200 transition-colors",
+              selected: "bg-blue-600 text-white hover:bg-blue-600",
+              today: "text-blue-500 font-bold",
+              disabled: "text-gray-300 line-through cursor-not-allowed",
+            }}
+          />
+
           {errors.date && (
             <p className="text-red-500 text-sm mt-1">{errors.date.message}</p>
           )}
@@ -318,10 +410,14 @@ const AppointmentForm: React.FC = () => {
           <div className="relative">
             <select
               {...register("timeslot")}
+              disabled={!selectedDate}
               className="w-full px-4 py-3 border text-gray-800 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="">Select a time</option>
-              {timeSlots.map((slot) => (
+              <option value="">
+                {" "}
+                {loadingTimes ? "Loading timeslots..." : "Select a time"}
+              </option>
+              {timeslotOptions.map((slot) => (
                 <option key={slot} value={slot}>
                   {slot}
                 </option>
@@ -395,7 +491,7 @@ const AppointmentForm: React.FC = () => {
                 className="w-full px-4 py-3 h-12 border text-gray-800 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Car Make</option>
-                {carMakes.map((make) => (
+                {makeOptions.map((make) => (
                   <option key={make} value={make}>
                     {make}
                   </option>
@@ -439,7 +535,7 @@ const AppointmentForm: React.FC = () => {
                     {" "}
                     {loadingModels ? "Loading models..." : "Select a model"}
                   </option>
-                  {carModels.map((model) => (
+                  {modelOptions.map((model) => (
                     <option key={model} value={model}>
                       {model}
                     </option>
@@ -540,7 +636,13 @@ const AppointmentForm: React.FC = () => {
         disabled={isSubmitting}
         className="w-full py-3 bg-[var(--motion-blue)] text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
       >
-        {isSubmitting ? "Booking..." : "Book Appointment"}
+        {isSubmitting && !defaultValues
+          ? "Booking..."
+          : isSubmitting
+            ? "Updating..."
+            : !defaultValues
+              ? "Book Appointment"
+              : "Update Appointment"}
       </button>
     </motion.form>
   );

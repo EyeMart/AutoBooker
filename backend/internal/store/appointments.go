@@ -87,6 +87,45 @@ func (s *Store) GetAppointments(queried AppointmentArguments) ([]Appointment, er
 	return parseRows(rows)
 }
 
+func (s *Store) GetSpecificAppointment(id string) (*Appointment, error) {
+
+	query := `SELECT customer_comments, employee_notes, first_name, last_name, email, phone, make, model, year, mileage, date, timeslot, service FROM appointments where id=$1`
+
+	fmt.Println(query)
+
+	row := s.DB.QueryRow(query, id)
+
+	var app Appointment
+	if err := row.Scan(&app.CustComments, &app.EmplNotes, &app.FirstName, &app.LastName, &app.Email, &app.Phone, &app.Make, &app.Model, &app.Year, &app.Mileage, &app.Date, &app.TimeSlot, &app.Service); err != nil {
+		return nil, err
+	}
+
+	return &app, nil
+}
+
+func (s *Store) GetTimeSlots(onDate string) ([]string, error) {
+
+	query := "SELECT timeslot FROM appointments where date=$1"
+
+	rows, err := s.DB.Query(query, onDate)
+
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	timeslots := []string{}
+	for rows.Next() {
+		var time string
+		if err := rows.Scan(&time); err != nil {
+			return timeslots, err
+		}
+		timeslots = append(timeslots, time)
+	}
+	return timeslots, nil
+}
+
 func (s *Store) ChangeAppointment(id string, changes Appointment) (string, string, error) {
 	tx, err := s.DB.Begin()
 	if err != nil {

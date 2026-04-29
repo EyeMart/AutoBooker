@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { services, timeSlots } from "./constants";
+import { useNavigate } from "react-router-dom";
 
 type Appointment = {
   id: number;
@@ -13,17 +14,36 @@ type Appointment = {
   date: string;
   timeslot: string;
   service: string;
-  notes?: string;
+  customer_comments?: string;
+  employee_notes?: string;
 };
 
 export default function AdminAppointments() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Partial<Appointment>>({});
-  const [deleteConfirm, setConfirmation] = useState(false);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const checkRole = async () => {
+      try {
+        const res = await fetch(`/api/role`, {
+          credentials: "include",
+        });
+
+        if (!res.ok) throw new Error("Error getting role");
+
+        const data = await res.json();
+        if (data.role != "admin") {
+          navigate("/auth");
+        }
+      } catch (err) {
+        console.error(err);
+        navigate("/auth");
+      }
+    };
+    checkRole();
     fetchAppointments();
   }, []);
 
@@ -91,6 +111,11 @@ export default function AdminAppointments() {
 
   async function deleteAppointment(id: number) {
     try {
+      const confirmed = confirm(
+        "Are you sure you want to delete this appointment?",
+      );
+      if (!confirmed) return;
+
       const res = await fetch(`/api/appointments/${id}`, {
         method: "DELETE",
         headers: {
@@ -139,6 +164,8 @@ export default function AdminAppointments() {
                 <th className="p-3 text-left">Service</th>
                 <th className="p-3 text-left">Date</th>
                 <th className="p-3 text-left">Time</th>
+                <th className="p-3 text-left">Customer Comments</th>
+                <th className="p-3 text-left">Employee Notes</th>
                 <th className="p-3 text-left">Edit/Delete</th>
               </tr>
             </thead>
@@ -224,8 +251,24 @@ export default function AdminAppointments() {
                       )}
                     </td>
 
+                    <td className="p-3">{appt.customer_comments}</td>
+
                     <td className="p-3">
-                      {isEditing && !deleteConfirm ? (
+                      {isEditing ? (
+                        <textarea
+                          onChange={(e) =>
+                            updateField("employee_notes", e.target.value)
+                          }
+                          rows={4}
+                          className="w-50 pl-2 pr-2 py-2 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                        />
+                      ) : (
+                        appt.employee_notes
+                      )}
+                    </td>
+
+                    <td className="p-3">
+                      {isEditing ? (
                         <div className="flex gap-2">
                           <button
                             onClick={() => saveAppointment(appt.id)}
@@ -234,28 +277,13 @@ export default function AdminAppointments() {
                             Save
                           </button>
                           <button
-                            onClick={() => setConfirmation(true)}
+                            onClick={() => deleteAppointment(appt.id)}
                             className="bg-red-500 text-white px-3 py-1 rounded"
                           >
                             Delete
                           </button>
                           <button
                             onClick={cancelEditing}
-                            className="bg-gray-500 text-white px-3 py-1 rounded"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      ) : deleteConfirm ? (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => deleteAppointment(appt.id)}
-                            className="bg-red-500 text-white px-3 py-1 rounded"
-                          >
-                            Are you sure?
-                          </button>
-                          <button
-                            onClick={() => setConfirmation(false)}
                             className="bg-gray-500 text-white px-3 py-1 rounded"
                           >
                             Cancel

@@ -62,7 +62,32 @@ func (a *App) GetAppointments(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, app)
+}
 
+func (a *App) GetSpecificAppointment(c *gin.Context) {
+	id := c.Param("id")
+	app, err := a.Store.GetSpecificAppointment(id)
+
+	if err != nil {
+		fmt.Println(err)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "not found"})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, *app)
+}
+
+func (a *App) GetTimeSlots(c *gin.Context) {
+	onDate := c.Query("on")
+	times, err := a.Store.GetTimeSlots(onDate)
+
+	if err != nil {
+		fmt.Println(err)
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "not found"})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, times)
 }
 
 func (a *App) DeleteAppointment(c *gin.Context) {

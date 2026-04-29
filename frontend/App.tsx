@@ -8,6 +8,7 @@ import Appointments from "./src/pages/Appointments.tsx";
 import Auth from "./src/pages/Auth.tsx";
 import Admin from "./src/pages/Admin.tsx";
 import NotFound from "./src/pages/NotFound";
+import ManageAppointment from "./src/pages/Manage";
 
 const App: React.FC = () => {
   return (
@@ -20,6 +21,7 @@ const App: React.FC = () => {
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
+            <Route path="/appointments/:id" element={<ManageAppointment />} />
           </Routes>
           <ToastContainer
             position="top-right"

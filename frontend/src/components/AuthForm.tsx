@@ -62,7 +62,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ initialMode = "signin" }) => {
     toast.success("Signed in successfully!");
     signInForm.reset();
     if (role.role === "admin") {
-      navigate("/appointments");
+      navigate("/admin");
     } else {
       navigate("/");
     }
@@ -125,7 +125,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ initialMode = "signin" }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="w-full max-w-md mx-auto bg-white rounded-2xl shadow-xl p-8"
+      className="w-full max-w-md mx-auto bg-gray-300 rounded-2xl shadow-xl p-8"
     >
       {mode === "signin" ? (
         <>
@@ -218,13 +218,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ initialMode = "signin" }) => {
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
             Create Account
           </h2>
-          <p className="text-gray-600 mb-8">
-            Join us to book appointments easily
-          </p>
+          <p className="text-gray-600 mb-8">Sign up to manage appointments</p>
 
           <form
             onSubmit={signUpForm.handleSubmit(onSignUp)}
-            className="space-y-6"
+            className="space-y-6 "
           >
             {/* Name */}
             <div>
