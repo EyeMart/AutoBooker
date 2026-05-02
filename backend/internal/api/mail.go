@@ -12,7 +12,7 @@ func SendConfirmation(custEmail string, custName string, service string, date st
 
 	client := resend.NewClient(apiKey)
 
-	link := "localhost:5173/appointments/" + id
+	link := os.Getenv("FRONTEND_URL") + id
 
 	email := `<body style="margin:0; padding:0; font-family: Arial, sans-serif; background:#f4f4f4;">
 			<div style="max-width:600px; margin:0 auto; background:#ffffff; padding:24px;">
@@ -41,7 +41,7 @@ func SendConfirmation(custEmail string, custName string, service string, date st
 			</p>
 			
 			<div style="text-align:center; margin:28px 0;">
-				<a href="https://google.com"
+				<a href="` + link + `"
 				style="background:#2563eb; color:#ffffff; text-decoration:none; padding:12px 20px; border-radius:6px; display:inline-block; font-weight:bold;">
 				Manage Appointment
 				</a>
@@ -59,12 +59,13 @@ func SendConfirmation(custEmail string, custName string, service string, date st
 			<p style="font-size:14px; color:#777;">
 				(661) 437-2419<br />
 			</p>
-			<a href="https://your-website.com" target="_blank">
-			<img 
-				src="https://fdcvaxgfxaufgkyvmwow.supabase.co/storage/v1/object/public/images/motion.png" 
-				alt="Motion Auto Works"
-				style="width:100%; max-width:600px; height:auto;"
-			/>
+			
+			<a href="` + os.Getenv("FRONTEND_URL") + `" target="_blank">
+				<img 
+					src="https://fdcvaxgfxaufgkyvmwow.supabase.co/storage/v1/object/public/images/motion.png" 
+					alt="Motion Auto Works"
+					style="width:100%; max-width:600px; height:auto;"
+				/>
 			</a>
 			</div>
 		</body>`
