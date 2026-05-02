@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/EyeMart07/scheduler/internal/api"
 	"github.com/EyeMart07/scheduler/internal/db"
@@ -27,5 +28,10 @@ func main() {
 	// sets up the server
 	router := gin.Default()
 	app.RegisterEndpoints(router)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 	router.Run()
 }
