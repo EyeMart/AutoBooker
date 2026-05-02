@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../lib/api";
 
 const signUpSchema = z
   .object({
@@ -53,7 +54,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ initialMode = "signin" }) => {
       credentials: "include" as RequestCredentials,
       headers: { "Content-Type": "application/json" },
     };
-    const roleResponse = await fetch("/api/role", roleOptions);
+    const roleResponse = await apiFetch("/api/role", roleOptions);
     if (!roleResponse.ok) {
       throw new Error();
     }
@@ -82,7 +83,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ initialMode = "signin" }) => {
           password: data.password,
         }),
       };
-      const response = await fetch("/api/register", requestOptions);
+      const response = await apiFetch("/api/register", requestOptions);
       if (response.ok) {
         await setRedirection();
       }
@@ -105,7 +106,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ initialMode = "signin" }) => {
           password: data.password,
         }),
       };
-      const response = await fetch("/api/signin", requestOptions);
+      const response = await apiFetch("/api/signin", requestOptions);
 
       if (response.ok) {
         await setRedirection();

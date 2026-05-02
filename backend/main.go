@@ -33,5 +33,5 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-	router.Run()
+	router.Run("0.0.0.0:" + port)
 }
