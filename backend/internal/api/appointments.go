@@ -183,6 +183,6 @@ func (a *App) CreateAppointment(c *gin.Context) {
 		return
 	}
 	// return the created status
-	SendConfirmation(newApp.Email, newApp.FirstName)
+	SendConfirmation(newApp.Email, newApp.FirstName, newApp.Service, newApp.Date, newApp.Timeslot, newApp.Make, newApp.Model, newApp.Year, id)
 	c.IndentedJSON(http.StatusCreated, newApp)
 }

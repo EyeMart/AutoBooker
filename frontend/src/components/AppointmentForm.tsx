@@ -8,9 +8,11 @@ import { motion } from "framer-motion";
 import { services, excludeSet, timeSlots } from "./constants";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
-
+import { useNavigate } from "react-router-dom";
 const optionalString = (schema: z.ZodString) =>
   z.preprocess((val) => (val === "" ? undefined : val), schema.optional());
+
+const navigate = useNavigate();
 
 const appointmentSchema = z
   .object({
@@ -492,8 +494,13 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
               >
                 <option value="">Car Make</option>
                 {makeOptions.map((make) => (
-                  <option key={make} value={make}>
-                    {make}
+                  <option
+                    key={make.substring(0, 1) + make.substring(1).toLowerCase()}
+                    value={
+                      make.substring(0, 1) + make.substring(1).toLowerCase()
+                    }
+                  >
+                    {make.substring(0, 1) + make.substring(1).toLowerCase()}
                   </option>
                 ))}
                 <option value="Other">Other</option>
