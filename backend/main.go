@@ -14,11 +14,8 @@ import (
 
 func main() {
 
-	db, err := db.Connect()
+	db := db.Connect()
 
-	if err != nil {
-		log.Fatal(err)
-	}
 	// closes the connection once the program ends
 	defer db.Close()
 
@@ -33,5 +30,7 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
+	log.Println("Starting server on port:", port)
+
 	router.Run("0.0.0.0:" + port)
 }
