@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AppointmentForm from "./AppointmentForm";
+import { apiFetch } from "../lib/api";
 
 type Appointment = {
   id: number;
@@ -32,7 +33,7 @@ export default function ManageAppointmentsPage() {
   }, []);
 
   async function fetchAppointment() {
-    const res = await fetch(`/api/appointments/${id}`);
+    const res = await apiFetch(`/api/appointments/${id}`);
     if (res.status === 404 || !res.ok) {
       navigate("/");
       return;
@@ -51,7 +52,7 @@ export default function ManageAppointmentsPage() {
     );
     if (!confirmed) return;
 
-    const res = await fetch(`/api/appointments/${id}`, {
+    const res = await apiFetch(`/api/appointments/${id}`, {
       method: "DELETE",
     });
 
@@ -95,7 +96,7 @@ export default function ManageAppointmentsPage() {
               employee_notes: appointment.employee_notes,
               customer_comments: data.comments,
             };
-            await fetch(`/api/appointments/${id}`, {
+            await apiFetch(`/api/appointments/${id}`, {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(payload),

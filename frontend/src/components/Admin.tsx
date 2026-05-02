@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { services, timeSlots } from "./constants";
+import { services, timeSlots } from "../lib/constants";
 import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../lib/api";
 
 type Appointment = {
   id: number;
@@ -28,7 +29,7 @@ export default function AdminAppointments() {
   useEffect(() => {
     const checkRole = async () => {
       try {
-        const res = await fetch(`/api/role`, {
+        const res = await apiFetch(`/api/role`, {
           credentials: "include",
         });
 
@@ -61,7 +62,7 @@ export default function AdminAppointments() {
       const fmonth = String(futureDate.getMonth() + 1).padStart(2, "0"); // Months are 0-based
       const fday = String(futureDate.getDate()).padStart(2, "0");
 
-      const res = await fetch(
+      const res = await apiFetch(
         `/api/admin/appointments?from=${year}-${month}-${day}&to=${fyear}-${fmonth}-${fday}`,
         {
           credentials: "include",
@@ -91,7 +92,7 @@ export default function AdminAppointments() {
 
   async function saveAppointment(id: number) {
     try {
-      const res = await fetch(`/api/appointments/${id}`, {
+      const res = await apiFetch(`/api/appointments/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -116,7 +117,7 @@ export default function AdminAppointments() {
       );
       if (!confirmed) return;
 
-      const res = await fetch(`/api/appointments/${id}`, {
+      const res = await apiFetch(`/api/appointments/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

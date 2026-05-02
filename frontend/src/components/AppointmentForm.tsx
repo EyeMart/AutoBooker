@@ -5,9 +5,11 @@ import { z } from "zod";
 import { toast } from "react-toastify";
 import { User, Mail, Phone, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
-import { services, excludeSet, timeSlots } from "./constants";
+import { services, excludeSet, timeSlots } from "../lib/constants";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
+import { apiFetch } from "../lib/api";
+
 const optionalString = (schema: z.ZodString) =>
   z.preprocess((val) => (val === "" ? undefined : val), schema.optional());
 
@@ -204,7 +206,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
       setLoadingTimes(true);
 
       try {
-        const res = await fetch(`/api/unavailableslots?on=${selectedDate}`, {
+        const res = await apiFetch(`/api/unavailableslots?on=${selectedDate}`, {
           credentials: "include",
         });
 
@@ -267,7 +269,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
           service: data.service,
         }),
       };
-      const response = await fetch("/api/appointments", appointmentOptions);
+      const response = await apiFetch("/api/appointments", appointmentOptions);
       if (!response.ok) {
         throw new Error();
       }

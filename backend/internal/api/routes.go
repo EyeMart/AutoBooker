@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -9,7 +10,9 @@ import (
 
 func (a *App) RegisterEndpoints(router *gin.Engine) {
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173", "http://localhost:5173/book-appointment", "http://localhost:5173/admin"},
+		AllowOrigins: []string{"http://localhost:5173",
+			os.Getenv("FRONTEND_URL"),
+		},
 		AllowMethods:     []string{"GET", "POST", "OPTIONS", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Content-Type"},
 		AllowCredentials: true,
