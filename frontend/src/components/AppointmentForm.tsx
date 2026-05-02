@@ -8,11 +8,8 @@ import { motion } from "framer-motion";
 import { services, excludeSet, timeSlots } from "./constants";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
-import { useNavigate } from "react-router-dom";
 const optionalString = (schema: z.ZodString) =>
   z.preprocess((val) => (val === "" ? undefined : val), schema.optional());
-
-const navigate = useNavigate();
 
 const appointmentSchema = z
   .object({
