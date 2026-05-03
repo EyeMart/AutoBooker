@@ -257,6 +257,7 @@ export default function AdminAppointments() {
                     <td className="p-3">
                       {isEditing ? (
                         <textarea
+                          placeholder={"Enter notes here"}
                           onChange={(e) =>
                             updateField("employee_notes", e.target.value)
                           }

@@ -64,7 +64,7 @@ func buildAppointmentQuery(queried AppointmentArguments) (string, []any) {
 		q += " WHERE " + strings.Join(where, " AND ")
 	}
 
-	q += " ORDER BY timeslot ASC"
+	q += " ORDER BY date ASC, timeslot ASC"
 
 	return q, args
 }
