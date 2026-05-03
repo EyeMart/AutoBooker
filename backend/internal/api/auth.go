@@ -57,7 +57,7 @@ func (a *App) setSessionCookie(c *gin.Context, customerId string) (string, error
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   true,
-		SameSite: http.SameSiteNoneMode,
+		SameSite: http.SameSiteLaxMode,
 		Expires:  time.Now().Add(7 * 24 * time.Hour),
 	})
 

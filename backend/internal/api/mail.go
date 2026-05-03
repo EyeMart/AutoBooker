@@ -71,10 +71,10 @@ func SendConfirmation(custEmail string, custName string, service string, date st
 		</body>`
 
 	params := &resend.SendEmailRequest{
-		From:    "onboarding@resend.dev",
+		From:    "NO-REPLY@confirm.motionautoworks.shop",
 		To:      []string{custEmail},
 		Subject: "Appointment Confirmation",
-		Text:    "Congrats on sending your first email!",
+		Text:    "Confirming appointment on " + date,
 		Html:    email,
 	}
 
