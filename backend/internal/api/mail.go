@@ -12,10 +12,13 @@ func SendConfirmation(custEmail string, custName string, service string, date st
 
 	client := resend.NewClient(apiKey)
 
-	link := os.Getenv("FRONTEND_URL") + "/" + id
+	link := os.Getenv("FRONTEND_URL") + "/appointments/" + id
 
 	email := `<body style="margin:0; padding:0; font-family: Arial, sans-serif; background:#f4f4f4;">
 			<div style="max-width:600px; margin:0 auto; background:#ffffff; padding:24px;">
+
+			<h2 style="margin-top:0; color:#222;">Appointment Confirmed!</h2>
+
 			
 			<p style="font-size:16px; color:#333;">
 				Hi ` + custName + `,
@@ -29,7 +32,7 @@ func SendConfirmation(custEmail string, custName string, service string, date st
 				<h3 style="margin-top:0; color:#222;">Appointment Details</h3>
 
 				<p><strong>Service:</strong> ` + service + `</p>
-				<p><strong>Date:</strong> ` + date[5:] + "-" + date[:5] + `</p>
+				<p><strong>Date:</strong> ` + date[5:] + "-" + date[:4] + `</p>
 				<p><strong>Time:</strong> ` + time + `</p>
 				<p><strong>Vehicle:</strong> ` + year + ` ` + make + ` ` + model + `</p>
 			</div>
