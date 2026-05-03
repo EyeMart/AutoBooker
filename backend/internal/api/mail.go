@@ -8,7 +8,7 @@ import (
 )
 
 func SendConfirmation(custEmail string, custName string, service string, date string, time string, make string, model string, year string, id string) {
-	apiKey := os.Getenv("Mail_Key")
+	apiKey := os.Getenv("MAIL_KEY")
 
 	client := resend.NewClient(apiKey)
 
@@ -71,7 +71,7 @@ func SendConfirmation(custEmail string, custName string, service string, date st
 		</body>`
 
 	params := &resend.SendEmailRequest{
-		From:    "NO-REPLY@confirm.motionautoworks.shop",
+		From:    "Motion Auto Works <no-reply@confirm.motionautoworks.shop>",
 		To:      []string{custEmail},
 		Subject: "Appointment Confirmation",
 		Text:    "Confirming appointment on " + date,
@@ -80,7 +80,7 @@ func SendConfirmation(custEmail string, custName string, service string, date st
 
 	sent, err := client.Emails.Send(params)
 	if err != nil {
-		log.Fatalf("failed to send email: %v", err)
+		log.Printf("failed to send email: %v", err)
 	}
 
 	log.Printf("email sent: %s", sent.Id)
