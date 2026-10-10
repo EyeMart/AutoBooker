@@ -18,17 +18,13 @@ const HeroSection: React.FC = () => {
             Putting you back in{" "}
             <span className="font-bond text-[var(--motion-red)]">motion.</span>
           </h1>
-          <div className="hidden lg:flex text-1xl md:text-1xl lg:text-3xl text-center font-small mx-auto mb-8 flex justify-between">
+          <div className="hidden lg:flex text-1xl md:text-1xl lg:text-3xl text-center font-small mx-auto mb-8 flex max-w-xl justify-between">
             <span>(661) 437-2419</span>
-            <span>2229 Chester Avenue, Bakersfield CA, 93301</span>
             <span>License #310103</span>
           </div>
 
           <div className="lg:hidden text-1xl md:text-2xl lg:text-3xl text-center font-small mx-auto mb-8 leading-tight">
             (661) 437-2419
-          </div>
-          <div className="lg:hidden text-1xl md:text-2xl lg:text-3xl text-center font-small mx-auto mb-8 leading-tight">
-            2229 Chester Avenue, Bakersfield CA, 93301
           </div>
           <div className="lg:hidden text-1xl md:text-2xl lg:text-3xl text-center font-small mx-auto mb-8 leading-tight">
             License #310103
